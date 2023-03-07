@@ -1,5 +1,5 @@
 import pool from "../config/db";
-import { OkPacket } from "mysql2";
+import { OkPacket, RowDataPacket } from "mysql2";
 import { notesQuery } from "../queries/NotesQuery";
 
 interface Note {
@@ -11,6 +11,10 @@ interface Note {
   updated_at?: Date;
 }
 
+interface CountRowData extends RowDataPacket {
+  count?: number;
+}
+
 export const notesService = {
   getNotes: async (userId: number, page: number, pageSize: number) => {
     const offset = (page - 1) * pageSize;
@@ -19,7 +23,13 @@ export const notesService = {
       pageSize,
       offset,
     ]);
-    return rows;
+
+    const [totalCountRow] = await pool.query<CountRowData[]>(
+      notesQuery.countTotalNotes,
+      [userId]
+    );
+
+    return { memos: rows, total_count: totalCountRow[0].count };
   },
   addNotes: async (userId: number, title: string, content: string) => {
     const [result] = await pool.query(notesQuery.addNotes, [
