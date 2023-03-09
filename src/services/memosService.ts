@@ -31,6 +31,28 @@ export const memosService = {
 
     return { memos: rows, total_count: totalCountRow[0].count };
   },
+  searchMemos: async (
+    userId: number,
+    searchQuery: string,
+    page: number,
+    pageSize: number
+  ) => {
+    const offset = (page - 1) * pageSize;
+    const searchTerm = `%${searchQuery}%`;
+    const [rows] = await pool.query(memosQuery.searchMemos, [
+      userId,
+      searchTerm,
+      searchTerm,
+      pageSize,
+      offset,
+    ]);
+
+    const [totalCountRow] = await pool.query<CountRowData[]>(
+      memosQuery.countSearchMemos,
+      [userId, searchTerm, searchTerm]
+    );
+    return { memos: rows, total_count: totalCountRow[0].count };
+  },
   addMemos: async (userId: number, title: string, content: string) => {
     const [result] = await pool.query(memosQuery.addMemos, [
       userId,

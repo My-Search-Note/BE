@@ -3,15 +3,40 @@ import { memosService } from "../../services/memosService";
 
 interface CustomRequest extends Request {
   userId?: number;
+  keyword?: string;
 }
 
 export const memosController = {
   getMemos: async (req: CustomRequest, res: Response) => {
     try {
-      const page = req.query.page ? +req.query.page : 1;
-      const pageSize = req.query.pageSize ? +req.query.pageSize : 5;
+      const page = req.query.page ? Number(req.query.page) : 1;
+      const pageSize = req.query.pageSize ? Number(req.query.pageSize) : 5;
+
       const userId = req.userId!;
+
       const memos = await memosService.getMemos(userId, page, pageSize);
+      res.status(200).json(memos);
+    } catch (error) {
+      console.error(error);
+
+      res.status(500).json({ message: "Internal Server Error" });
+    }
+  },
+
+  searchMemos: async (req: CustomRequest, res: Response) => {
+    try {
+      const page = req.query.page ? Number(req.query.page) : 1;
+      const pageSize = req.query.pageSize ? Number(req.query.pageSize) : 5;
+      const keyword = req.query.keyword as string;
+
+      const userId = req.userId!;
+
+      const memos = await memosService.searchMemos(
+        userId,
+        keyword,
+        page,
+        pageSize
+      );
 
       res.status(200).json(memos);
     } catch (error) {

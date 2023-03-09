@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { notesService } from "../../services/NotesService";
+import { notesService } from "../../services/notesService";
 
 interface CustomRequest extends Request {
   userId?: number;

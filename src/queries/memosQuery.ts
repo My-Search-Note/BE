@@ -2,6 +2,17 @@ export const memosQuery = {
   getMemos:
     "SELECT * FROM memos WHERE user_id = ? ORDER BY id DESC LIMIT ? OFFSET ?",
   countTotalMemos: "SELECT COUNT(*) AS count FROM memos WHERE user_id = ?",
+  searchMemos: `
+  SELECT *
+  FROM memos
+  WHERE user_id = ? AND (title LIKE ? OR content LIKE ?)
+  LIMIT ? OFFSET ?;
+`,
+  countSearchMemos: `
+  SELECT COUNT(*) AS count
+  FROM memos
+  WHERE user_id = ? AND (title LIKE ? OR content LIKE ?);
+`,
   addMemos:
     "INSERT INTO memos (user_id, title, content, created_at) VALUES (?, ?, ?, now())",
   editMemos:
