@@ -14,7 +14,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true })); //특문, 공백
 
 // api별 router 연결
-app.use("/api", userRoutes);
+app.use("/user", userRoutes);
 app.use("/memos", authMiddleware, memosRoutes);
 app.use("/notes", authMiddleware, noteRoutes);
 
