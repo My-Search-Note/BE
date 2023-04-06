@@ -7,6 +7,7 @@ const memosRoutes = Router();
 memosRoutes.post("/", memosController.addMemos);
 memosRoutes.get("/", memosController.getMemos);
 memosRoutes.get("/search", memosController.searchMemos);
+memosRoutes.get("/:id", memosController.getMemoById);
 memosRoutes.put("/:id", memosController.editMemos);
 memosRoutes.delete("/:id", memosController.deleteMemos);
 

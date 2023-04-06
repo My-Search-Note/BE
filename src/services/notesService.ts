@@ -1,6 +1,6 @@
 import pool from "../config/db";
 import { OkPacket, RowDataPacket } from "mysql2";
-import { notesQuery } from "../queries/NotesQuery";
+import { notesQuery } from "../queries/notesQuery";
 
 interface Note {
   note_id: number;
@@ -29,7 +29,7 @@ export const notesService = {
       [userId]
     );
 
-    return { memos: rows, total_count: totalCountRow[0].count };
+    return { memos: rows, totalCount: totalCountRow[0].count };
   },
   addNotes: async (userId: number, title: string, content: string) => {
     const [result] = await pool.query(notesQuery.addNotes, [

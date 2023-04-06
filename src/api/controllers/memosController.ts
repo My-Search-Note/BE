@@ -18,8 +18,29 @@ export const memosController = {
       res.status(200).json(memos);
     } catch (error) {
       console.error(error);
-
       res.status(500).json({ message: "Internal Server Error" });
+    }
+  },
+
+  getMemoById: async (req: CustomRequest, res: Response) => {
+    try {
+      const userId = req.userId!;
+      const memoId = Number(req.params.id);
+
+      if (isNaN(memoId)) {
+        return res.status(400).json({ message: "Invalid memo ID" });
+      }
+
+      const memo = await memosService.getMemoById(memoId, userId);
+
+      if (!memo) {
+        return res.status(404).json({ message: "Memo not found" });
+      }
+
+      return res.status(200).json(memo);
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: "Internal server error" });
     }
   },
 

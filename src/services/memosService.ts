@@ -18,6 +18,7 @@ interface CountRowData extends RowDataPacket {
 export const memosService = {
   getMemos: async (userId: number, page: number, pageSize: number) => {
     const offset = (page - 1) * pageSize;
+
     const [rows] = await pool.query(memosQuery.getMemos, [
       userId,
       pageSize,
@@ -29,8 +30,21 @@ export const memosService = {
       [userId]
     );
 
-    return { memos: rows, total_count: totalCountRow[0].count };
+    //배열 내에 아무것도 없으면 undefinde return 막기 위함.
+    const totalCount = totalCountRow[0]?.count ?? 0;
+    //pageCount가 1보다 작으면 1을 return.
+    const pageCount = Math.max(Math.ceil(totalCount / pageSize), 1);
+
+    return { memos: rows, totalCount: totalCount, pageCount: pageCount };
   },
+
+  getMemoById: async (memoId: number, userId: number): Promise<Memo | null> => {
+    const [rows] = await pool.query(memosQuery.getMemoById, [memoId, userId]);
+    const memos = rows as Memo[];
+
+    return memos.length ? memos[0] : null;
+  },
+
   searchMemos: async (
     userId: number,
     searchQuery: string,
@@ -51,8 +65,19 @@ export const memosService = {
       memosQuery.countSearchMemos,
       [userId, searchTerm, searchTerm]
     );
-    return { memos: rows, total_count: totalCountRow[0].count };
+
+    //배열 내에 아무것도 없으면 undefinde return 막기 위함.
+    const totalCount = totalCountRow[0]?.count ?? 0;
+    //pageCount가 1보다 작으면 1을 return.
+    const pageCount = Math.max(Math.ceil(totalCount / pageSize), 1);
+
+    return {
+      memos: rows,
+      totalCount: totalCount,
+      pageCount: pageCount,
+    };
   },
+
   addMemos: async (userId: number, title: string, content: string) => {
     const [result] = await pool.query(memosQuery.addMemos, [
       userId,
@@ -61,6 +86,7 @@ export const memosService = {
     ]);
     return (result as OkPacket).insertId;
   },
+
   editMemos: async (
     memoId: number,
     userId: number,
@@ -78,6 +104,7 @@ export const memosService = {
     }
     return memoId;
   },
+
   deleteMemos: async (memoId: number, userId: number) => {
     const [result] = await pool.query(memosQuery.deleteMemos, [memoId, userId]);
     if ((result as OkPacket).affectedRows > 0) {
