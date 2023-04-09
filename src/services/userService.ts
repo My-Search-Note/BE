@@ -13,6 +13,11 @@ type UserRow = {
   password: string;
 };
 
+type VerificationCodeRow = {
+  email: string;
+  code: number;
+};
+
 export const userService = {
   signupUser: async (email: string, name: string, password: string) => {
     const hashedPassword = await bcrypt.hash(password, saltRounds);
@@ -80,7 +85,28 @@ export const userService = {
       picture: user.picture,
     };
   },
-
+  SaveVerificationCode: async (email: string, verificationCode: number) => {
+    const [result] = await pool.query(userQuery.saveVerificationCode, [
+      email,
+      verificationCode,
+    ]);
+    console.log("SaveVerificationCode result:", result);
+    return result;
+  },
+  checkVerificationCode: async (email: string, verificationCode: number) => {
+    const [rows] = await pool.query<VerificationCodeRow[] & RowDataPacket[]>(
+      userQuery.checkVerificationCode,
+      [email, verificationCode]
+    );
+    return rows.length > 0;
+  },
+  removeVerificationCode: async (email: string, verificationCode: number) => {
+    const [result] = await pool.query(userQuery.removeVerificationCode, [
+      email,
+      verificationCode,
+    ]);
+    return result;
+  },
   deleteUser: async (userId: number) => {
     const [result] = await pool.query(userQuery.deleteUser, [userId]);
     if ((result as OkPacket).affectedRows > 0) {

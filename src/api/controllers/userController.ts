@@ -10,10 +10,21 @@ interface CustomRequest extends Request {
 
 export const userController = {
   signup: async (req: Request, res: Response) => {
-    const { email, name, password } = req.body;
+    const { email, name, password, verificationCode } = req.body;
+
     try {
-      const rows = await userService.signupUser(email, name, password);
-      res.status(201).send("User registered successfully!");
+      const isCodeValid = await userService.checkVerificationCode(
+        email,
+        verificationCode
+      );
+
+      if (isCodeValid) {
+        await userService.signupUser(email, name, password);
+        await userService.removeVerificationCode(email, verificationCode);
+        res.status(201).send("User registered successfully!");
+      } else {
+        res.status(400).json({ message: "Invalid verification code" });
+      }
     } catch (err) {
       return res.status(500).json(err);
     }
@@ -73,10 +84,9 @@ export const userController = {
       };
 
       await transporter.sendMail(mailOptions);
+      await userService.SaveVerificationCode(email, verificationCode);
 
-      res
-        .status(200)
-        .json({ message: "Verification code sent", verificationCode });
+      res.status(200).json({ message: "Verification code sent" });
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: "Failed to send email" });
